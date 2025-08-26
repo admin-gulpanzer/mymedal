@@ -1,0 +1,130 @@
+.app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgba(14, 14, 14, 0.5);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 1000;
+  padding: 0;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 4rem;
+  /*max-width: 1400px;*/
+  margin: 0 auto;
+}
+
+.app-branding {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.app-logo {
+  height: 38px;
+  width: auto;
+  object-fit: contain;
+}
+
+.app-name {
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+}
+
+.settings-dropdown {
+  position: relative;
+}
+
+.settings-button {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: rgba(180, 180, 180, 0.8);
+  padding: 0.75rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.settings-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: rgba(200, 200, 200, 0.9);
+}
+
+.settings-button i {
+  font-size: 1.1rem;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  background: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 0.5rem 0;
+  min-width: 180px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  z-index: 1001;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.dropdown-item i {
+  font-size: 0.9rem;
+  width: 16px;
+  text-align: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .header-content {
+    padding: 1rem;
+  }
+  
+  .app-name {
+    font-size: 1.3rem;
+  }
+  
+  .dropdown-menu {
+    min-width: 160px;
+  }
+}
