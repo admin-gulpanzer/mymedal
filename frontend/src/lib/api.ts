@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://mymedal.vercel.app';
 
 class ApiClient {
   private async getAuthHeaders(): Promise<Record<string, string>> {
@@ -7,8 +7,10 @@ class ApiClient {
     };
 
     try {
-      // For development, use a mock token that the backend recognizes
-      headers['Authorization'] = 'Bearer demo-token-123';
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
     } catch (error) {
       console.warn('No auth token available');
     }
