@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://backend-six-pi-14.vercel.app';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://mymedal-backend.vercel.app';
 
 // Add cache busting to ensure fresh configuration
 console.log('API Base URL:', API_BASE_URL, 'Timestamp:', new Date().toISOString());
