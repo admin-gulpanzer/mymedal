@@ -1,5 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
+// Use the same API base URL as the apiClient
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://mymedal-backend.vercel.app';
+
 interface User {
   id: string;
   email: string;
@@ -68,7 +71,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const token = localStorage.getItem('authToken');
         if (token) {
           // Verify token with backend
-          const response = await fetch('http://localhost:3001/api/auth/verify', {
+          const response = await fetch(`${API_BASE_URL}/api/auth/verify`, {
             headers: {
               'Authorization': `Bearer ${token}`,
             },
@@ -98,7 +101,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(true);
       setError(null);
       
-      const response = await fetch('http://localhost:3001/api/auth/signin', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/signin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -129,7 +132,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(true);
       setError(null);
       
-      const response = await fetch('http://localhost:3001/api/auth/signup', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -172,7 +175,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return;
       }
       
-      const response = await fetch('http://localhost:3001/api/medals', {
+      const response = await fetch(`${API_BASE_URL}/api/medals`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -198,7 +201,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         try {
           setRacesLoading(true);
           console.log('Loading races...');
-          const response = await fetch('http://localhost:3001/api/races');
+          const response = await fetch(`${API_BASE_URL}/api/races`);
           if (response.ok) {
             const racesData = await response.json();
             console.log('Races loaded:', racesData.length);
