@@ -1,4 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
+import pool from '../config/database';
 
 export interface AuthenticatedRequest extends Request {
   user?: any;
@@ -17,12 +19,25 @@ export const authenticateUser = async (
 
     const token = authHeader.substring(7);
     
-    // For now, just create a mock user object for development
-    // TODO: Implement proper Stack Auth verification
+    // Verify JWT token
+    const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    
+    // Get user data from database
+    const userResult = await pool.query(
+      'SELECT id, email, display_name FROM auth_users WHERE id = $1',
+      [decoded.userId]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(401).json({ error: 'User not found' });
+    }
+
+    const user = userResult.rows[0];
     req.user = {
-      id: 'demo-user-123',
-      email: 'demo@example.com',
-      displayName: 'Demo User'
+      id: user.id,
+      email: user.email,
+      displayName: user.display_name
     };
     
     next();
@@ -40,12 +55,31 @@ export const optionalAuth = async (
   try {
     const authHeader = req.headers.authorization;
     if (authHeader?.startsWith('Bearer ')) {
-      // For now, just create a mock user object for development
-      req.user = {
-        id: 'demo-user-123',
-        email: 'demo@example.com',
-        displayName: 'Demo User'
-      };
+      const token = authHeader.substring(7);
+      
+      try {
+        // Verify JWT token
+        const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+        const decoded = jwt.verify(token, JWT_SECRET) as any;
+        
+        // Get user data from database
+        const userResult = await pool.query(
+          'SELECT id, email, display_name FROM auth_users WHERE id = $1',
+          [decoded.userId]
+        );
+
+        if (userResult.rows.length > 0) {
+          const user = userResult.rows[0];
+          req.user = {
+            id: user.id,
+            email: user.email,
+            displayName: user.display_name
+          };
+        }
+      } catch (tokenError) {
+        // Invalid token, continue without user
+        console.log('Invalid token in optional auth:', (tokenError as Error).message);
+      }
     }
     next();
   } catch (error) {

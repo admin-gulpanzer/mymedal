@@ -9,6 +9,7 @@ const router = Router();
 router.get('/', authenticateUser, async (req: AuthenticatedRequest, res) => {
   try {
     const userId = req.user?.id;
+    const userEmail = req.user?.email;
     
     const result = await pool.query(`
       SELECT um.*,
@@ -29,7 +30,7 @@ router.get('/', authenticateUser, async (req: AuthenticatedRequest, res) => {
       LEFT JOIN race_stats rs ON um.race_stat_id = rs.id
       WHERE um.user_id = $1
       ORDER BY um.claimed_at DESC
-    `, [userId]);
+    `, [userEmail]);
     
     res.json(result.rows);
   } catch (error) {
@@ -42,7 +43,8 @@ router.get('/', authenticateUser, async (req: AuthenticatedRequest, res) => {
 router.post('/claim', authenticateUser, async (req: AuthenticatedRequest, res) => {
   try {
     const userId = req.user?.id;
-    const { race_id, bib_number, notes } = req.body;
+    const userEmail = req.user?.email;
+    const { race_id, bib_number, notes, full_name } = req.body;
     
     if (!race_id || !bib_number) {
       return res.status(400).json({ error: 'Race ID and bib number are required' });
@@ -64,7 +66,7 @@ router.post('/claim', authenticateUser, async (req: AuthenticatedRequest, res) =
     const existingClaim = await pool.query(`
       SELECT id FROM user_medals 
       WHERE user_id = $1 AND race_id = $2
-    `, [userId, race_id]);
+    `, [userEmail, race_id]);
     
     if (existingClaim.rows.length > 0) {
       return res.status(409).json({ error: 'Medal already claimed for this race' });
@@ -72,10 +74,10 @@ router.post('/claim', authenticateUser, async (req: AuthenticatedRequest, res) =
     
     // Claim the medal
     const result = await pool.query(`
-      INSERT INTO user_medals (user_id, race_id, race_stat_id, notes, is_verified)
-      VALUES ($1, $2, $3, $4, false)
+      INSERT INTO user_medals (user_id, race_id, race_stat_id, notes, full_name, is_verified)
+      VALUES ($1, $2, $3, $4, $5, false)
       RETURNING *
-    `, [userId, race_id, race_stat_id, notes || null]);
+    `, [userEmail, race_id, race_stat_id, notes || null, full_name || null]);
     
     res.status(201).json(result.rows[0]);
   } catch (error) {
@@ -88,6 +90,7 @@ router.post('/claim', authenticateUser, async (req: AuthenticatedRequest, res) =
 router.patch('/:id', authenticateUser, async (req: AuthenticatedRequest, res) => {
   try {
     const userId = req.user?.id;
+    const userEmail = req.user?.email;
     const { id } = req.params;
     const { notes, medal_image_url } = req.body;
     
@@ -97,7 +100,7 @@ router.patch('/:id', authenticateUser, async (req: AuthenticatedRequest, res) =>
           medal_image_url = COALESCE($2, medal_image_url)
       WHERE id = $3 AND user_id = $4
       RETURNING *
-    `, [notes, medal_image_url, id, userId]);
+    `, [notes, medal_image_url, id, userEmail]);
     
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Medal not found or not owned by user' });
@@ -114,13 +117,14 @@ router.patch('/:id', authenticateUser, async (req: AuthenticatedRequest, res) =>
 router.delete('/:id', authenticateUser, async (req: AuthenticatedRequest, res) => {
   try {
     const userId = req.user?.id;
+    const userEmail = req.user?.email;
     const { id } = req.params;
     
     const result = await pool.query(`
       DELETE FROM user_medals 
       WHERE id = $1 AND user_id = $2
       RETURNING *
-    `, [id, userId]);
+    `, [id, userEmail]);
     
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Medal not found or not owned by user' });

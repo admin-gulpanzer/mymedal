@@ -30,14 +30,13 @@ const Header: React.FC = () => {
               alt="My Medal Logo" 
               className="h-8 sm:h-9 md:h-10 lg:h-11 xl:h-12 w-auto object-contain" 
             />
-            {isAuthenticated && user && (
-              <span className="text-white text-sm">Welcome, {user.displayName}</span>
-            )}
           </div>
           
           <div className="flex items-center gap-4">
-            {isAuthenticated ? (
-              <div className="relative">
+            {isAuthenticated && user ? (
+              <>
+                <span className="text-white text-sm">Welcome, {user.displayName}</span>
+                <div className="relative">
                 <button 
                   className="bg-transparent border border-white/20 rounded-lg text-gray-400 
                              p-2.5 sm:p-3 cursor-pointer transition-all duration-300 ease-in-out 
@@ -70,7 +69,8 @@ const Header: React.FC = () => {
                     </button>
                   </div>
                 )}
-              </div>
+                </div>
+              </>
             ) : (
               <button
                 onClick={() => setIsAuthModalOpen(true)}

@@ -56,7 +56,7 @@ router.post('/signup', async (req: Request, res: Response) => {
       user: {
         id: user.id,
         email: user.email,
-        displayName: user.name,
+        displayName: user.display_name,
       },
       token,
     });
@@ -104,7 +104,7 @@ router.post('/signin', async (req: Request, res: Response) => {
       user: {
         id: user.id,
         email: user.email,
-        displayName: user.name,
+        displayName: user.display_name,
       },
       token,
     });
@@ -143,7 +143,7 @@ router.get('/verify', async (req: AuthRequest, res: Response) => {
       user: {
         id: user.id,
         email: user.email,
-        displayName: user.name,
+        displayName: user.display_name,
       },
     });
   } catch (error) {

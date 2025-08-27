@@ -35,6 +35,7 @@ export interface UserMedal {
   medal_image_url?: string;
   claimed_at: Date;
   notes?: string;
+  full_name?: string;
   is_verified: boolean;
 }
 

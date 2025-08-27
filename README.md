@@ -157,6 +157,7 @@ CREATE TABLE user_medals (
   medal_image_url TEXT,
   claimed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   notes TEXT,
+  full_name VARCHAR(255),
   is_verified BOOLEAN DEFAULT FALSE
 );
 ```
@@ -170,7 +171,7 @@ CREATE TABLE user_medals (
 
 ### Medals (Protected)
 - `GET /api/medals` - Get user's medals
-- `POST /api/medals/claim` - Claim a medal
+- `POST /api/medals/claim` - Claim a medal (requires: race_id, bib_number, full_name)
 - `PATCH /api/medals/:id` - Update medal
 - `DELETE /api/medals/:id` - Delete medal claim
 

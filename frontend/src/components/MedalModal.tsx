@@ -1,7 +1,21 @@
 import React, { useState, useEffect } from 'react';
 
 interface MedalModalProps {
-  medal: any;
+  medal: {
+    id: string;
+    race_name: string;
+    race_date: string;
+    race_distance: string;
+    finish_time?: any;
+    race_location?: string;
+    race_description?: string;
+    is_verified?: boolean;
+    claimed_at: string;
+    full_name?: string;
+    // Race stats data
+    bib_number?: string;
+    overall_place?: number;
+  };
   isOpen: boolean;
   onClose: () => void;
 }
@@ -11,6 +25,49 @@ const MedalModal: React.FC<MedalModalProps> = ({ medal, isOpen, onClose }) => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [shareMessage, setShareMessage] = useState('');
   const [downloadMessage, setDownloadMessage] = useState('');
+
+  // Extract medal data based on the structure
+  const medalData = {
+    id: medal.id,
+    name: medal.race_name,
+    date: new Date(medal.race_date).toLocaleDateString('en-GB', { 
+      day: 'numeric', 
+      month: 'long', 
+      year: 'numeric' 
+    }),
+    distance: medal.race_distance,
+    time: formatTime(medal.finish_time),
+    location: medal.race_location,
+    notes: medal.race_description,
+    verified: medal.is_verified,
+    // Race stats
+    bibNumber: medal.bib_number || 'N/A',
+    overallPlace: medal.overall_place || 'N/A'
+  };
+
+  // Helper function to format time from database
+  function formatTime(timeData: any): string {
+    if (!timeData) return 'N/A';
+    
+    // If it's already a string, return as is
+    if (typeof timeData === 'string') return timeData;
+    
+    // If it's an object with hours, minutes, seconds, format it
+    if (typeof timeData === 'object' && timeData.hours !== undefined) {
+      const hours = timeData.hours || 0;
+      const minutes = timeData.minutes || 0;
+      const seconds = timeData.seconds || 0;
+      
+      if (hours > 0) {
+        return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      } else {
+        return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+      }
+    }
+    
+    // Fallback
+    return 'N/A';
+  }
 
   // Handle escape key to close modal
   useEffect(() => {
@@ -43,8 +100,8 @@ const MedalModal: React.FC<MedalModalProps> = ({ medal, isOpen, onClose }) => {
       // Check if Web Share API is supported and available
       if (navigator.share && navigator.canShare) {
         const shareData = {
-          title: `${medal.name} Achievement`,
-          text: `I completed ${medal.name} in ${medal.time}!`,
+          title: `${medalData.name} Achievement`,
+          text: `I completed ${medalData.name} in ${medalData.time}! Distance: ${medalData.distance}${medalData.overallPlace !== 'N/A' ? `, Overall Rank: ${medalData.overallPlace}` : ''}`,
           url: window.location.href
         };
 
@@ -60,7 +117,7 @@ const MedalModal: React.FC<MedalModalProps> = ({ medal, isOpen, onClose }) => {
         }
       } else {
         // Fallback to clipboard
-        const shareText = `I completed ${medal.name} in ${medal.time}!`;
+        const shareText = `I completed ${medalData.name} in ${medalData.time}! Distance: ${medalData.distance}${medalData.overallPlace !== 'N/A' ? `, Overall Rank: ${medalData.overallPlace}` : ''}`;
         await navigator.clipboard.writeText(shareText);
         setShareMessage('Achievement copied to clipboard!');
         
@@ -74,12 +131,13 @@ const MedalModal: React.FC<MedalModalProps> = ({ medal, isOpen, onClose }) => {
       
       // Final fallback - try to copy to clipboard with user interaction
       try {
-        const shareText = `I completed ${medal.name} in ${medal.time}!`;
+        const shareText = `I completed ${medalData.name} in ${medalData.time}! Distance: ${medalData.distance}${medalData.overallPlace !== 'N/A' ? `, Overall Rank: ${medalData.overallPlace}` : ''}`;
         await navigator.clipboard.writeText(shareText);
         setShareMessage('Achievement copied to clipboard!');
       } catch (clipboardError) {
         // If clipboard also fails, show manual copy message
-        setShareMessage('Please manually copy: I completed ' + medal.name + ' in ' + medal.time + '!');
+        const manualText = `I completed ${medalData.name} in ${medalData.time}! Distance: ${medalData.distance}${medalData.overallPlace !== 'N/A' ? `, Overall Rank: ${medalData.overallPlace}` : ''}`;
+        setShareMessage('Please manually copy: ' + manualText);
       }
       
       // Auto-close message after 3 seconds
@@ -135,22 +193,32 @@ const MedalModal: React.FC<MedalModalProps> = ({ medal, isOpen, onClose }) => {
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 36px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText(medal.name, 400, 600);
+        ctx.fillText(medalData.name, 400, 600);
         
         // Add completion date
         ctx.font = '24px Arial';
         ctx.fillStyle = '#cccccc';
-        ctx.fillText(`Completed: ${medal.date}`, 400, 640);
+        ctx.fillText(`Completed: ${medalData.date}`, 400, 640);
         
         // Add time with green color
         ctx.fillStyle = '#4ade80';
         ctx.font = 'bold 28px Arial';
-        ctx.fillText(`Time: ${medal.time}`, 400, 680);
+        ctx.fillText(`Time: ${medalData.time}`, 400, 680);
         
         // Add distance
         ctx.fillStyle = '#cccccc';
         ctx.font = '24px Arial';
-        ctx.fillText(`Distance: ${medal.distance}`, 400, 720);
+        ctx.fillText(`Distance: ${medalData.distance}`, 400, 720);
+        
+        // Add bib number if available
+        if (medalData.bibNumber !== 'N/A') {
+          ctx.fillText(`BIB: #${medalData.bibNumber}`, 400, 750);
+        }
+        
+        // Add overall rank if available
+        if (medalData.overallPlace !== 'N/A') {
+          ctx.fillText(`Overall Rank: ${medalData.overallPlace}`, 400, 780);
+        }
         
         // Add achievement badge at the top
         ctx.fillStyle = '#ffd700';
@@ -215,7 +283,7 @@ const MedalModal: React.FC<MedalModalProps> = ({ medal, isOpen, onClose }) => {
           if (blob) {
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
-            link.download = `${medal.name.replace(/\s+/g, '_')}_medal.png`;
+            link.download = `${medalData.name.replace(/\s+/g, '_')}_medal.png`;
             link.href = url;
             link.click();
             URL.revokeObjectURL(url);
@@ -243,15 +311,23 @@ const MedalModal: React.FC<MedalModalProps> = ({ medal, isOpen, onClose }) => {
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 32px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText(medal.name, 400, 350);
+        ctx.fillText(medalData.name, 400, 350);
         ctx.font = '24px Arial';
-        ctx.fillText(`Completed: ${medal.date}`, 400, 390);
-        ctx.fillText(`Time: ${medal.time}`, 400, 420);
-        ctx.fillText(`Distance: ${medal.distance}`, 400, 450);
+        ctx.fillText(`Completed: ${medalData.date}`, 400, 390);
+        ctx.fillText(`Time: ${medalData.time}`, 400, 420);
+        ctx.fillText(`Distance: ${medalData.distance}`, 400, 450);
+        
+        // Add race stats if available
+        if (medalData.bibNumber !== 'N/A') {
+          ctx.fillText(`BIB: #${medalData.bibNumber}`, 400, 480);
+        }
+        if (medalData.overallPlace !== 'N/A') {
+          ctx.fillText(`Overall Rank: ${medalData.overallPlace}`, 400, 510);
+        }
         
         // Download fallback
         const link = document.createElement('a');
-        link.download = `${medal.name.replace(/\s+/g, '_')}_medal.png`;
+        link.download = `${medalData.name.replace(/\s+/g, '_')}_medal.png`;
         link.href = canvas.toDataURL();
         link.click();
         setIsDownloading(false);
@@ -305,29 +381,29 @@ const MedalModal: React.FC<MedalModalProps> = ({ medal, isOpen, onClose }) => {
         <div className="flex flex-col items-center text-center mb-6">
           <img 
             src="/goldmedal.png" 
-            alt={`Medal - ${medal.name}`}
+            alt={`Medal - ${medalData.name}`}
             className="w-64 h-96 sm:w-72 sm:h-108 object-cover mb-6"
           />
-          <h2 id="medal-title" className="text-xl sm:text-2xl font-bold text-white mb-2">{medal.name}</h2>
-          <p className="text-gray-300 text-base opacity-80 m-0">{medal.date}</p>
+          <h2 id="medal-title" className="text-xl sm:text-2xl font-bold text-white mb-2">{medalData.name}</h2>
+          <p className="text-gray-300 text-base opacity-80 m-0">{medalData.date}</p>
         </div>
         
         <div className="grid grid-cols-2 gap-2 mb-6">
           <div className="flex flex-col items-center p-3 text-center">
             <span className="text-xs text-gray-400 mb-1">BIB:</span>
-            <span className="text-sm text-white">#{Math.floor(Math.random() * 9000) + 1000}</span>
+            <span className="text-sm text-white">#{medalData.bibNumber}</span>
           </div>
           <div className="flex flex-col items-center p-3 text-center">
             <span className="text-xs text-gray-400 mb-1">Distance:</span>
-            <span className="text-sm text-white">{medal.distance}</span>
+            <span className="text-sm text-white">{medalData.distance}</span>
           </div>
           <div className="flex flex-col items-center p-3 text-center">
             <span className="text-xs text-gray-400 mb-1">Finish Time:</span>
-            <span className="text-sm text-green-400 font-semibold">{medal.time}</span>
+            <span className="text-sm text-green-400 font-semibold">{medalData.time}</span>
           </div>
           <div className="flex flex-col items-center p-3 text-center">
-            <span className="text-xs text-gray-400 mb-1">Rank:</span>
-            <span className="text-sm text-white">1,247 / 30,000</span>
+            <span className="text-xs text-gray-400 mb-1">Overall Rank:</span>
+            <span className="text-sm text-white">{medalData.overallPlace}</span>
           </div>
         </div>
         

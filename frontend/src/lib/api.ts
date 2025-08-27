@@ -86,7 +86,7 @@ export const raceApi = {
 
 export const medalApi = {
   getUserMedals: () => apiClient.get('/api/medals'),
-  claimMedal: (data: { race_id: number; bib_number: string; notes?: string }) => 
+  claimMedal: (data: { race_id: number; bib_number: string; full_name: string; notes?: string }) => 
     apiClient.post('/api/medals/claim', data),
   updateMedal: (id: number, data: { notes?: string; medal_image_url?: string }) => 
     apiClient.patch(`/api/medals/${id}`, data),
