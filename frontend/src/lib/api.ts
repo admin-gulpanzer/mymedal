@@ -1,5 +1,8 @@
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://mymedal.vercel.app';
 
+// Add cache busting to ensure fresh configuration
+console.log('API Base URL:', API_BASE_URL, 'Timestamp:', new Date().toISOString());
+
 class ApiClient {
   private async getAuthHeaders(): Promise<Record<string, string>> {
     const headers: Record<string, string> = {
