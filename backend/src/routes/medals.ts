@@ -1,9 +1,9 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import pool from '../config/database';
 import { UserMedalWithDetails } from '../types';
 import { authenticateUser, AuthenticatedRequest } from '../middleware/auth';
 
-const router = Router();
+const router: Router = Router();
 
 // Get user's medals
 router.get('/', authenticateUser, async (req: AuthenticatedRequest, res) => {

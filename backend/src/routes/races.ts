@@ -1,9 +1,9 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import pool from '../config/database';
 import { Race } from '../types';
 import { optionalAuth } from '../middleware/auth';
 
-const router = Router();
+const router: Router = Router();
 
 // Get all races
 router.get('/', optionalAuth, async (req, res) => {

@@ -1,7 +1,8 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
+import pool from '../config/database';
 import { authenticateUser, AuthenticatedRequest } from '../middleware/auth';
 
-const router = Router();
+const router: Router = Router();
 
 // Get current user profile
 router.get('/profile', authenticateUser, async (req: AuthenticatedRequest, res) => {

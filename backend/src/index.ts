@@ -22,7 +22,7 @@ const PORT = process.env.PORT || 3001;
 app.use(helmet());
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://your-frontend-domain.com'] 
+    ? [process.env.FRONTEND_URL || 'https://mymedal-cvr4kc30g-gulpanzer-projects.vercel.app'] 
     : [process.env.FRONTEND_URL || 'http://localhost:3000'],
   credentials: true
 }));
